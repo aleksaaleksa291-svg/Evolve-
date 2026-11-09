@@ -1,0 +1,19 @@
+{
+  "name": "EVOLVE — Tvoj razvoj",
+  "short_name": "EVOLVE",
+  "lang": "sr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1018",
+  "theme_color": "#10131d",
+  "description": "Trening, napredak, učenje, razmišljanje i finansijske veštine.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10131d">
+  <meta name="description" content="EVOLVE — trening, učenje, napredak i pametne finansijske navike.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>EVOLVE — tvoj razvoj</title>
+  <style>
+    :root{--bg:#0d1018;--panel:#171c29;--panel2:#202738;--text:#f4f6fb;--muted:#9ca8bd;--line:#2b3448;--accent:#9be15d;--accent2:#55c8b0;--warn:#f5c46b;--radius:18px}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top right,#1b2b35 0%,var(--bg) 48%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:1050px;margin:auto;padding:20px 18px 100px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#10151a;font-weight:900;font-size:19px}
+    h1{font-size:20px;margin:0;letter-spacing:1.5px}header p{margin:0;color:var(--muted);font-size:12px}.date{color:var(--muted);font-size:12px;text-align:right}
+    .hero{padding:23px;border:1px solid #354254;border-radius:24px;background:linear-gradient(120deg,#202d36,#18202b 65%,#202738);margin-bottom:16px}
+    .eyebrow{color:var(--accent);font-weight:700;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}.hero h2{font-size:clamp(24px,5vw,36px);line-height:1.12;margin:9px 0}.hero p{color:#b9c4d4;margin:0;max-width:590px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}.stat{background:#111a22a8;border:1px solid #344452;border-radius:15px;padding:12px}.stat b{display:block;font-size:23px}.stat span{color:var(--muted);font-size:11px}
+    nav{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:16px 0 20px}.tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:13px;padding:11px 4px;font-size:12px}.tab.active{background:#26372e;color:var(--accent);border-color:#668c54}
+    .section{display:none}.section.active{display:block}.section-head{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:0 0 13px}.section h2{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:17px;min-width:0}.card h3{font-size:15px;margin:0 0 7px}.card p{color:var(--muted);font-size:13px;margin:4px 0 12px}
+    .wide{grid-column:1/-1}.progress{height:8px;background:#30394a;border-radius:20px;overflow:hidden;margin:10px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:20px}
+    .btn{border:0;border-radius:12px;padding:10px 14px;background:var(--accent);color:#142016;font-weight:750;font-size:13px}.btn.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.btn.small{padding:7px 10px;font-size:12px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    input,textarea,select{width:100%;background:#101521;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px;margin:5px 0 10px;outline:none}label{font-size:12px;color:var(--muted)}textarea{min-height:75px;resize:vertical}
+    .item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.item small{color:var(--muted);display:block}.pill{font-size:10px;color:var(--accent);border:1px solid #526c4a;padding:3px 8px;border-radius:20px;white-space:nowrap}
+    .lesson{padding:14px;background:#111723;border-radius:14px;margin:9px 0;border:1px solid var(--line)}.lesson p{margin:6px 0;color:#bdc7d5}.lesson strong{font-size:13px}
+    .empty{color:var(--muted);font-size:13px;padding:12px 0}.footer{text-align:center;color:#778398;font-size:11px;margin:30px 0 0}
+    .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#e7f6d8;color:#172016;padding:10px 16px;border-radius:12px;font-weight:700;box-shadow:0 8px 30px #0008;display:none;z-index:5}
+    @media(max-width:650px){.app{padding:15px 13px 95px}.grid{grid-template-columns:1fr}.stats{gap:7px}.stat{padding:10px}.stat b{font-size:20px}nav{position:fixed;z-index:4;bottom:0;left:0;right:0;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0d1018ee;backdrop-filter:blur(12px);border-top:1px solid var(--line)}.tab{font-size:10px;padding:10px 2px}.hero{padding:19px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="logo">E</div><div><h1>EVOLVE</h1><p>Treniraj. Uči. Napreduj.</p></div></div>
+    <div class="date" id="today"></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Tvoj lični sistem razvoja</div>
+    <h2>Mali koraci.<br>Veliki napredak.</h2>
+    <p>Gradi snagu, znanje, dobre navike i veštine koje mogu da ti pomognu da jednog dana samostalno zarađuješ.</p>
+    <div class="stats">
+      <div class="stat"><b id="doneCount">0</b><span>završeni zadaci</span></div>
+      <div class="stat"><b id="workoutCount">0</b><span>zabeleženi treninzi</span></div>
+      <div class="stat"><b id="streakCount">0</b><span>dana aktivnosti</span></div>
+    </div>
+  </section>
+
+  <nav aria-label="Glavna navigacija">
+    <button class="tab active" data-tab="home">Početna</button>
+    <button class="tab" data-tab="training">Trening</button>
+    <button class="tab" data-tab="learning">Učenje</button>
+    <button class="tab" data-tab="mind">Um</button>
+    <button class="tab" data-tab="money">Novac</button>
+  </nav>
+
+  <main>
+    <section class="section active" id="home">
+      <div class="section-head"><div><h2>Plan za danas</h2><div class="sub">Napredak se gradi dosledno, ne savršeno.</div></div><span class="pill" id="taskProgress">0 / 3</span></div>
+      <div class="card">
+        <div id="dailyTasks"></div>
+        <div class="progress"><i id="taskBar" style="width:0%"></i></div>
+        <div class="sub">Označi šta si završio. Zadaci se čuvaju na ovom uređaju.</div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="card"><h3>Fokus nedelje</h3><p>Izaberi jednu veštinu i radi na njoj malo svakog dana.</p><strong>Doslednost pre intenziteta.</strong></div>
+        <div class="card"><h3>Podsetnik</h3><p>San, odmor, dobra ishrana i bezbedan trening deo su napretka.</p><strong>Oporavak je važan.</strong></div>
+      </div>
+    </section>
+
+    <section class="section" id="training">
+      <div class="section-head"><div><h2>Trening</h2><div class="sub">Beleži vežbe i prati kontinuitet.</div></div></div>
+      <div class="grid">
+        <div class="card">
+          <h3>Zabeleži trening</h3>
+          <label for="workoutType">Vrsta aktivnosti</label>
+          <select id="workoutType"><option>Trening snage</option><option>Kondicija</option><option>Sport</option><option>Mobilnost i istezanje</option><option>Šetnja</option></select>
+          <label for="workoutMinutes">Trajanje (minuta)</label><input id="workoutMinutes" type="number" min="1" max="300" placeholder="Na primer 30">
+          <label for="workoutNote">Beleška (opciono)</label><input id="workoutNote" maxlength="100" placeholder="Kako je prošlo?">
+          <button class="btn" id="addWorkout">Sačuvaj trening</button>
+        </div>
+        <div class="card"><h3>Ukupno</h3><p>Broj zabeleženih aktivnosti</p><div style="font-size:32px;font-weight:800" id="workoutTotal">0</div><div class="sub" id="minutesTotal">0 minuta ukupno</div></div>
+        <div class="card wide"><h3>Istorija treninga</h3><div id="workoutList" class="empty">Još nema zabeleženih treninga.</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="learning">
+      <div class="section-head"><div><h2>Učenje</h2><div class="sub">Znanje koje možeš da primeniš.</div></div></div>
+      <div class="grid">
+        <div class="card"><h3>Kako učiti efikasnije</h3><div class="lesson"><strong>Aktivno prisećanje</strong><p>Pročitaj kratku lekciju, skloni tekst i pokušaj da svojim rečima objasniš šta si zapamtio.</p></div><div class="lesson"><strong>Ponavljanje u razmacima</strong><p>Vrati se gradivu sutra, zatim za nekoliko dana. Tako proveravaš šta zaista znaš.</p></div></div>
+        <div class="card"><h3>Moje beleške</h3><label for="noteTitle">Naslov</label><input id="noteTitle" maxlength="60" placeholder="Šta sam naučio?"><label for="noteBody">Beleška</label><textarea id="noteBody" maxlength="1000" placeholder="Zapiši ideju svojim rečima..."></textarea><button class="btn" id="addNote">Sačuvaj belešku</button></div>
+        <div class="card wide"><h3>Sačuvane beleške</h3><div id="notesList" class="empty">Beleške koje dodaš pojaviće se ovde.</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="mind">
+      <div class="section-head"><div><h2>Vežbaj razmišljanje</h2><div class="sub">Logika, pamćenje i kritičko mišljenje.</div></div></div>
+      <div class="card">
+        <span class="pill">Zadatak za razmišljanje</span>
+        <h3 id="puzzleQuestion" style="margin-top:12px">Koji broj dolazi sledeći: 2, 4, 8, 16, ...?</h3>
+        <input id="puzzleAnswer" placeholder="Tvoj odgovor">
+        <button class="btn" id="checkPuzzle">Proveri odgovor</button>
+        <button class="btn secondary" id="newPuzzle">Drugi zadatak</button>
+        <p id="puzzleFeedback" aria-live="polite"></p>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="card"><h3>Mini-vežba pamćenja</h3><p>Pročitaj pet reči, zatim skroluj dalje i pokušaj da ih ponoviš bez gledanja.</p><strong id="memoryWords">JABUKA · MOST · KNJIGA · REKA · SAT</strong><div class="actions"><button class="btn secondary small" id="hideWords">Sakrij reči</button><button class="btn secondary small" id="showWords">Prikaži reči</button></div></div>
+        <div class="card"><h3>Kritičko mišljenje</h3><p>Pre nego što poveruješ nekoj tvrdnji, pitaj se:</p><ul class="sub"><li>Koji je dokaz?</li><li>Ko je izvor informacije?</li><li>Šta bi pokazalo da tvrdnja nije tačna?</li></ul></div>
+      </div>
+    </section>
+
+    <section class="section" id="money">
+      <div class="section-head"><div><h2>Veštine za zaradu</h2><div class="sub">Uči kako nastaje vrednost — bez brzih i rizičnih obećanja.</div></div></div>
+      <div class="card">
+        <span class="pill">Osnove novca</span>
+        <h3 style="margin-top:12px">Pravilo broj jedan: prvo razvij veštinu.</h3>
+        <p>Novac se najčešće zarađuje tako što nekome pružiš korisnu uslugu ili napraviš nešto što ljudima treba. Ne postoji pouzdan način da se brzo obogatiš bez rizika.</p>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="card"><h3>1. Izaberi veštinu</h3><p>Primeri: dizajn, montaža videa, programiranje, pisanje, jezici ili podučavanje predmeta koji dobro znaš.</p><span class="pill">Učenje</span></div>
+        <div class="card"><h3>2. Napravi primer rada</h3><p>Napravi mali projekat koji pokazuje šta umeš: poster, kratku montažu, jednostavnu stranicu ili prezentaciju.</p><span class="pill">Portfolio</span></div>
+        <div class="card"><h3>3. Razumi vrednost</h3><p>Razmisli kome tvoj rad pomaže, koji problem rešava i kako možeš da ga poboljšaš.</p><span class="pill">Preduzetništvo</span></div>
+        <div class="card"><h3>4. Nauči da čuvaš novac</h3><p>Razlikuj potrebe i želje. Vodi evidenciju novca koji dobiješ i planiraj štednju.</p><span class="pill">Budžet</span></div>
+        <div class="card wide"><h3>Prvi mali projekat</h3><p>Izaberi jednu veštinu i napravi nešto za vežbu u narednih sedam dana. Ako želiš da radiš ili prodaješ nešto dok si maloletan, uključi roditelja/staratelja i proverite pravila i bezbednost zajedno. Ne deli lične podatke, ne plaćaj da bi „dobio posao“ i kloni se obećanja sigurne ili brze zarade.</p><label for="skillGoal">Veština koju želim da razvijem</label><input id="skillGoal" maxlength="80" placeholder="Npr. dizajn ili programiranje"><button class="btn" id="saveSkill">Sačuvaj moj cilj</button><p id="skillSaved" class="sub"></p></div>
+      </div>
+      <div class="card" style="margin-top:12px"><h3>Kratka lekcija: prihod i trošak</h3><p><strong>Prihod</strong> je novac koji dobiješ. <strong>Trošak</strong> je novac koji potrošiš. Ako vodiš evidenciju oba, lakše razumeš gde novac odlazi. Za početak vežbaj na izmišljenom primeru ili uz roditelja/staratelja.</p></div>
+    </section>
+  </main>
+  <div class="footer">EVOLVE · Tvoji podaci ostaju u ovom pregledaču na ovom uređaju.</div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $ = s => document.querySelector(s);
+const read = (k,d) => {try{return JSON.parse(localStorage.getItem("evolve_"+k)) ?? d}catch{return d}};
+const save = (k,v) => localStorage.setItem("evolve_"+k,JSON.stringify(v));
+let workouts=read("workouts",[]), notes=read("notes",[]), tasks=read("tasks",{}), skill=read("skill","");
+const todayKey=new Date().toISOString().slice(0,10);
+$("#today").textContent=new Intl.DateTimeFormat("sr-RS",{weekday:"short",day:"numeric",month:"short"}).format(new Date());
+function toast(t){const el=$("#toast");el.textContent=t;el.style.display="block";setTimeout(()=>el.style.display="none",1900)}
+function stats(){const done=Object.values(tasks).filter(Boolean).length;$("#doneCount").textContent=done;$("#workoutCount").textContent=workouts.length;$("#workoutTotal").textContent=workouts.length;$("#minutesTotal").textContent=workouts.reduce((a,w)=>a+w.minutes,0)+" minuta ukupno";$("#streakCount").textContent=done+workouts.length}
+const daily=[["Pokreni telo","Uradi bezbednu aktivnost ili prošetaj."],["Nauči nešto","Odvoji 15–20 minuta za jednu temu."],["Razmisli","Reši zadatak ili zapiši jednu novu ideju."]];
+function renderTasks(){let done=0;$("#dailyTasks").innerHTML=daily.map((t,i)=>{let c=!!tasks[todayKey+"_"+i];if(c)done++;return `<div class="item"><div><strong>${t[0]}</strong><small>${t[1]}</small></div><input aria-label="Završi: ${t[0]}" type="checkbox" data-task="${i}" ${c?"checked":""} style="width:22px;height:22px;margin:0;accent-color:#9be15d"></div>`}).join("");$("#taskProgress").textContent=done+" / 3";$("#taskBar").style.width=(done/3*100)+"%";$("#dailyTasks").querySelectorAll("[data-task]").forEach(x=>x.addEventListener("change",e=>{tasks[todayKey+"_"+e.target.dataset.task]=e.target.checked;save("tasks",tasks);renderTasks();stats()}))}
+function renderWorkouts(){if(!workouts.length){$("#workoutList").className="empty";$("#workoutList").textContent="Još nema zabeleženih treninga.";return}$("#workoutList").className="";$("#workoutList").innerHTML=workouts.slice().reverse().map(w=>`<div class="item"><div><strong>${w.type}</strong><small>${w.date} · ${w.minutes} min ${w.note?"· "+escapeHtml(w.note):""}</small></div></div>`).join("")}
+function renderNotes(){if(!notes.length){$("#notesList").className="empty";$("#notesList").textContent="Beleške koje dodaš pojaviće se ovde.";return}$("#notesList").className="";$("#notesList").innerHTML=notes.slice().reverse().map(n=>`<div class="lesson"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.body)}</p><small class="sub">${n.date}</small></div>`).join("")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".section").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));window.scrollTo({top:0,behavior:"smooth"})}));
+$("#addWorkout").onclick=()=>{let m=Number($("#workoutMinutes").value);if(!Number.isInteger(m)||m<1||m>300){toast("Unesi trajanje od 1 do 300 minuta.");return}workouts.push({type:$("#workoutType").value,minutes:m,note:$("#workoutNote").value.trim(),date:new Date().toLocaleDateString("sr-RS")});save("workouts",workouts);$("#workoutMinutes").value="";$("#workoutNote").value="";renderWorkouts();stats();toast("Trening je sačuvan.")};
+$("#addNote").onclick=()=>{let title=$("#noteTitle").value.trim(),body=$("#noteBody").value.trim();if(!title||!body){toast("Dodaj naslov i belešku.");return}notes.push({title,body,date:new Date().toLocaleDateString("sr-RS")});save("notes",notes);$("#noteTitle").value="";$("#noteBody").value="";renderNotes();toast("Beleška je sačuvana.")};
+const puzzles=[{q:"Koji broj dolazi sledeći: 2, 4, 8, 16, ...?",a:"32",why:"Svaki broj se množi sa 2."},{q:"Ana ima 3 kutije sa po 4 olovke. Koliko olovaka ima ukupno?",a:"12",why:"3 × 4 = 12."},{q:"Šta je teže: kilogram gvožđa ili kilogram pamuca?",a:"isto",why:"Oba imaju masu od jednog kilograma."},{q:"Nastavi niz: 5, 10, 15, 20, ...",a:"25",why:"Dodaje se 5."}];let puzzle=0;
+function nextPuzzle(){puzzle=(puzzle+1)%puzzles.length;$("#puzzleQuestion").textContent=puzzles[puzzle].q;$("#puzzleAnswer").value="";$("#puzzleFeedback").textContent=""}
+$("#checkPuzzle").onclick=()=>{let v=$("#puzzleAnswer").value.trim().toLowerCase();let p=puzzles[puzzle];$("#puzzleFeedback").textContent=(v===p.a||((p.a==="isto")&&v==="jednako"))?"Tačno. "+p.why:"Pokušaj ponovo. Razmisli o obrascu.";};
+$("#newPuzzle").onclick=nextPuzzle;$("#hideWords").onclick=()=>$("#memoryWords").style.visibility="hidden";$("#showWords").onclick=()=>$("#memoryWords").style.visibility="visible";
+$("#saveSkill").onclick=()=>{skill=$("#skillGoal").value.trim();if(!skill){toast("Upiši veštinu.");return}save("skill",skill);$("#skillSaved").textContent="Sačuvan cilj: "+skill;toast("Cilj je sačuvan.")};
+if(skill){$("#skillGoal").value=skill;$("#skillSaved").textContent="Sačuvan cilj: "+skill}
+renderTasks();renderWorkouts();renderNotes();stats();
+if("serviceWorker" in navigator && location.protocol!="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
