@@ -27,7 +27,8 @@
     .lesson{padding:14px;background:#111723;border-radius:14px;margin:9px 0;border:1px solid var(--line)}.lesson p{margin:6px 0;color:#bdc7d5}.lesson strong{font-size:13px}
     .empty{color:var(--muted);font-size:13px;padding:12px 0}.footer{text-align:center;color:#778398;font-size:11px;margin:30px 0 0}
     .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#e7f6d8;color:#172016;padding:10px 16px;border-radius:12px;font-weight:700;box-shadow:0 8px 30px #0008;display:none;z-index:5}
-    @media(max-width:650px){.app{padding:15px 13px 95px}.grid{grid-template-columns:1fr}.stats{gap:7px}.stat{padding:10px}.stat b{font-size:20px}nav{position:fixed;z-index:4;bottom:0;left:0;right:0;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0d1018ee;backdrop-filter:blur(12px);border-top:1px solid var(--line)}.tab{font-size:10px;padding:10px 2px}.hero{padding:19px}}
+    .week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px}.day-box{background:#101923;border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center}.day-box strong{display:block;font-size:11px;color:var(--muted)}.day-box b{display:block;font-size:20px;margin:5px 0 2px}.day-box span{font-size:10px;color:#c5cedd}.mood-entry{padding:10px 0;border-top:1px solid var(--line);margin-top:10px}.mood-entry:first-child{border-top:0;padding-top:0}.mood-badge{display:inline-block;font-size:10px;border-radius:999px;padding:3px 8px;border:1px solid var(--line);background:#172332;color:var(--accent);margin-right:6px}.tag{display:inline-block;font-size:10px;color:var(--accent);padding:3px 7px;border-radius:999px;border:1px solid #526c4a;background:#12221b;margin:4px 0}
+    @media(max-width:650px){.app{padding:15px 13px 95px}.grid{grid-template-columns:1fr}.stats{gap:7px}.stat{padding:10px}.stat b{font-size:20px}nav{position:fixed;z-index:4;bottom:0;left:0;right:0;margin:0;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:#0d1018ee;backdrop-filter:blur(12px);border-top:1px solid var(--line)}.tab{font-size:10px;padding:10px 2px}.hero{padding:19px}.week-row{grid-template-columns:repeat(7,minmax(34px,1fr));gap:6px}}
   </style>
 </head>
 <body>
@@ -64,9 +65,29 @@
         <div class="progress"><i id="taskBar" style="width:0%"></i></div>
         <div class="sub">Označi šta si završio. Zadaci se čuvaju na ovom uređaju.</div>
       </div>
+
       <div class="grid" style="margin-top:12px">
+        <div class="card wide">
+          <h3>Nedeljni pregled</h3>
+          <div id="weekSummary" class="week-row"></div>
+        </div>
         <div class="card"><h3>Fokus nedelje</h3><p>Izaberi jednu veštinu i radi na njoj malo svakog dana.</p><strong>Doslednost pre intenziteta.</strong></div>
         <div class="card"><h3>Podsetnik</h3><p>San, odmor, dobra ishrana i bezbedan trening deo su napretka.</p><strong>Oporavak je važan.</strong></div>
+        <div class="card wide">
+          <h3>Moje raspoloženje</h3>
+          <label for="moodSelect">Kako se osećaš danas?</label>
+          <select id="moodSelect">
+            <option value="odlično">Odlično</option>
+            <option value="dobro">Dobro</option>
+            <option value="prijatno">Prijatno</option>
+            <option value="umorno">Umorno</option>
+            <option value="pod stresom">Pod stresom</option>
+          </select>
+          <label for="moodNote">Napomena</label>
+          <textarea id="moodNote" maxlength="300" placeholder="Šta ti je pomoglo ili što ti je teško danas?"></textarea>
+          <button class="btn" id="saveMood">Sačuvaj raspoloženje</button>
+          <div id="moodList" style="margin-top:10px"></div>
+        </div>
       </div>
     </section>
 
@@ -135,26 +156,30 @@
 const $ = s => document.querySelector(s);
 const read = (k,d) => {try{return JSON.parse(localStorage.getItem("evolve_"+k)) ?? d}catch{return d}};
 const save = (k,v) => localStorage.setItem("evolve_"+k,JSON.stringify(v));
-let workouts=read("workouts",[]), notes=read("notes",[]), tasks=read("tasks",{}), skill=read("skill","");
-const todayKey=new Date().toISOString().slice(0,10);
+const formatDateKey = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+let workouts=read("workouts",[]), notes=read("notes",[]), tasks=read("tasks",{}), skill=read("skill",""), moodLog=read("moodLog",[]);
+const todayKey=formatDateKey(new Date());
 $("#today").textContent=new Intl.DateTimeFormat("sr-RS",{weekday:"short",day:"numeric",month:"short"}).format(new Date());
 function toast(t){const el=$("#toast");el.textContent=t;el.style.display="block";setTimeout(()=>el.style.display="none",1900)}
 function stats(){const done=Object.values(tasks).filter(Boolean).length;$("#doneCount").textContent=done;$("#workoutCount").textContent=workouts.length;$("#workoutTotal").textContent=workouts.length;$("#minutesTotal").textContent=workouts.reduce((a,w)=>a+w.minutes,0)+" minuta ukupno";$("#streakCount").textContent=done+workouts.length}
 const daily=[["Pokreni telo","Uradi bezbednu aktivnost ili prošetaj."],["Nauči nešto","Odvoji 15–20 minuta za jednu temu."],["Razmisli","Reši zadatak ili zapiši jednu novu ideju."]];
-function renderTasks(){let done=0;$("#dailyTasks").innerHTML=daily.map((t,i)=>{let c=!!tasks[todayKey+"_"+i];if(c)done++;return `<div class="item"><div><strong>${t[0]}</strong><small>${t[1]}</small></div><input aria-label="Završi: ${t[0]}" type="checkbox" data-task="${i}" ${c?"checked":""} style="width:22px;height:22px;margin:0;accent-color:#9be15d"></div>`}).join("");$("#taskProgress").textContent=done+" / 3";$("#taskBar").style.width=(done/3*100)+"%";$("#dailyTasks").querySelectorAll("[data-task]").forEach(x=>x.addEventListener("change",e=>{tasks[todayKey+"_"+e.target.dataset.task]=e.target.checked;save("tasks",tasks);renderTasks();stats()}))}
+function renderTasks(){let done=0;$("#dailyTasks").innerHTML=daily.map((t,i)=>{let c=!!tasks[todayKey+"_"+i];if(c)done++;return `<div class="item"><div><strong>${t[0]}</strong><small>${t[1]}</small></div><input aria-label="Završi: ${t[0]}" type="checkbox" data-task="${i}" ${c?"checked":""} style="width:22px;height:22px;margin:0;accent-color:#9be15d"></div>`}).join("");$("#taskProgress").textContent=done+" / 3";$("#taskBar").style.width=(done/3*100)+"%";$("#dailyTasks").querySelectorAll("[data-task]").forEach(x=>x.addEventListener("change",e=>{tasks[todayKey+"_"+e.target.dataset.task]=e.target.checked;save("tasks",tasks);renderTasks();stats();renderWeekSummary()}))}
 function renderWorkouts(){if(!workouts.length){$("#workoutList").className="empty";$("#workoutList").textContent="Još nema zabeleženih treninga.";return}$("#workoutList").className="";$("#workoutList").innerHTML=workouts.slice().reverse().map(w=>`<div class="item"><div><strong>${w.type}</strong><small>${w.date} · ${w.minutes} min ${w.note?"· "+escapeHtml(w.note):""}</small></div></div>`).join("")}
 function renderNotes(){if(!notes.length){$("#notesList").className="empty";$("#notesList").textContent="Beleške koje dodaš pojaviće se ovde.";return}$("#notesList").className="";$("#notesList").innerHTML=notes.slice().reverse().map(n=>`<div class="lesson"><strong>${escapeHtml(n.title)}</strong><p>${escapeHtml(n.body)}</p><small class="sub">${n.date}</small></div>`).join("")}
+function renderMoodLog(){if(!moodLog.length){$("#moodList").innerHTML='<div class="empty">Nema zapisa o raspoloženju.</div>';return}$("#moodList").innerHTML=moodLog.slice().reverse().slice(0,5).map(item=>`<div class="mood-entry"><span class="mood-badge">${escapeHtml(item.mood)}</span><small class="sub">${item.date}</small><div>${escapeHtml(item.note || "Bez napomene")}</div></div>`).join("")}
+function renderWeekSummary(){const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const key=formatDateKey(d);const tasksDone=Object.keys(tasks).filter(k=>k.startsWith(key+"_") && tasks[k]).length;const workoutsDone=workouts.filter(w=>w.dateKey===key).length;days.push({label:new Intl.DateTimeFormat("sr-RS",{weekday:"short"}).format(d),value:tasksDone+workoutsDone,day: new Date(d).getDate(),key});}$("#weekSummary").innerHTML=days.map(day=>`<div class="day-box"><strong>${day.label}</strong><b>${day.value}</b><span>${day.day}</span></div>`).join("")}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));document.querySelectorAll(".section").forEach(x=>x.classList.toggle("active",x.id===b.dataset.tab));window.scrollTo({top:0,behavior:"smooth"})}));
-$("#addWorkout").onclick=()=>{let m=Number($("#workoutMinutes").value);if(!Number.isInteger(m)||m<1||m>300){toast("Unesi trajanje od 1 do 300 minuta.");return}workouts.push({type:$("#workoutType").value,minutes:m,note:$("#workoutNote").value.trim(),date:new Date().toLocaleDateString("sr-RS")});save("workouts",workouts);$("#workoutMinutes").value="";$("#workoutNote").value="";renderWorkouts();stats();toast("Trening je sačuvan.")};
+$("#addWorkout").onclick=()=>{let m=Number($("#workoutMinutes").value);if(!Number.isInteger(m)||m<1||m>300){toast("Unesi trajanje od 1 do 300 minuta.");return}const record={type:$("#workoutType").value,minutes:m,note:$("#workoutNote").value.trim(),date:new Date().toLocaleDateString("sr-RS"),dateKey:formatDateKey(new Date())};workouts.push(record);save("workouts",workouts);$("#workoutMinutes").value="";$("#workoutNote").value="";renderWorkouts();renderWeekSummary();stats();toast("Trening je sačuvan.")};
 $("#addNote").onclick=()=>{let title=$("#noteTitle").value.trim(),body=$("#noteBody").value.trim();if(!title||!body){toast("Dodaj naslov i belešku.");return}notes.push({title,body,date:new Date().toLocaleDateString("sr-RS")});save("notes",notes);$("#noteTitle").value="";$("#noteBody").value="";renderNotes();toast("Beleška je sačuvana.")};
-const puzzles=[{q:"Koji broj dolazi sledeći: 2, 4, 8, 16, ...?",a:"32",why:"Svaki broj se množi sa 2."},{q:"Ana ima 3 kutije sa po 4 olovke. Koliko olovaka ima ukupno?",a:"12",why:"3 × 4 = 12."},{q:"Šta je teže: kilogram gvožđa ili kilogram pamuca?",a:"isto",why:"Oba imaju masu od jednog kilograma."},{q:"Nastavi niz: 5, 10, 15, 20, ...",a:"25",why:"Dodaje se 5."}];let puzzle=0;
+$("#saveMood").onclick=()=>{const mood=$("#moodSelect").value.trim();const note=$("#moodNote").value.trim();if(!mood){toast("Izaberi raspoloženje.");return}moodLog.push({mood,note,date:new Date().toLocaleDateString("sr-RS")});save("moodLog",moodLog);$("#moodNote").value="";renderMoodLog();toast("Raspoloženje je sačuvano.")};
+const puzzles=[{q:"Koji broj dolazi sledeći: 2, 4, 8, 16, ...?",a:"32",why:"Svaki broj se množi sa 2."},{q:"Ana ima 3 kutije sa po 4 olovke. Koliko olovaka ima ukupno?",a:"12",why:"3 × 4 = 12."},{q:"Šta je teže: kilogram gvožđa ili kilogram pamuka?",a:"isto",why:"Oba imaju masu od jednog kilograma."},{q:"Nastavi niz: 5, 10, 15, 20, ...",a:"25",why:"Dodaje se 5."}];let puzzle=0;
 function nextPuzzle(){puzzle=(puzzle+1)%puzzles.length;$("#puzzleQuestion").textContent=puzzles[puzzle].q;$("#puzzleAnswer").value="";$("#puzzleFeedback").textContent=""}
 $("#checkPuzzle").onclick=()=>{let v=$("#puzzleAnswer").value.trim().toLowerCase();let p=puzzles[puzzle];$("#puzzleFeedback").textContent=(v===p.a||((p.a==="isto")&&v==="jednako"))?"Tačno. "+p.why:"Pokušaj ponovo. Razmisli o obrascu.";};
 $("#newPuzzle").onclick=nextPuzzle;$("#hideWords").onclick=()=>$("#memoryWords").style.visibility="hidden";$("#showWords").onclick=()=>$("#memoryWords").style.visibility="visible";
 $("#saveSkill").onclick=()=>{skill=$("#skillGoal").value.trim();if(!skill){toast("Upiši veštinu.");return}save("skill",skill);$("#skillSaved").textContent="Sačuvan cilj: "+skill;toast("Cilj je sačuvan.")};
 if(skill){$("#skillGoal").value=skill;$("#skillSaved").textContent="Sačuvan cilj: "+skill}
-renderTasks();renderWorkouts();renderNotes();stats();
+renderTasks();renderWorkouts();renderNotes();renderMoodLog();renderWeekSummary();stats();
 if("serviceWorker" in navigator && location.protocol!="file:"){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}))}
 </script>
 </body>
